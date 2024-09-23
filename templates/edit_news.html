@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+  
+{% block title %}Edit{% endblock %}
+  
+{% block content %}
+<h1>Edit News</h1>
+<form method="POST">
+<div class="cont" style="">
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.2); padding: 5px; margin-top: 5px">
+    <div>
+
+        <input class="form__field" type="text" name="description" value="{{ news['description'] }}" required>
+    </div>
+    <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <div>
+
+        <textarea class="form__field" name="main_text" required>{{ news['main_text'] }}</textarea>
+    </div>
+    </div>
+    <div>
+
+        <input class="form__field" type="text" name="note" value="{{ news['note'] }}">
+    </div>
+    <button class="btn" style="background-color: rgba(25,125,25,0.5); margin-top: 10px" type="submit">Save Changes</button>
+</div>
+</div>
+</form>
+{% endblock %}

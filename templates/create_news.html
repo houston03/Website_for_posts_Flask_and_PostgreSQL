@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+  
+{% block title %}About N{% endblock %}
+  
+{% block content %}
+<h1>Create</h1>
+<div>
+<div class="cont" style="">
+    <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.2); padding: 5px; margin-top: 5px">
+<form method="POST">
+    <textarea class="form__field" type="text" name="description" placeholder="Description" required></textarea><br>
+    <textarea class="form__field" name="main_text" placeholder="Main Text" required></textarea><br>
+    <textarea class="form__field" name="note" placeholder="Note"></textarea><br>
+    <button class="btn" style="background-color: rgba(25,125,25,0.5)" type="submit">Create News</button>
+
+</form>
+    </div>
+</div>
+</div>
+
+{% endblock %}

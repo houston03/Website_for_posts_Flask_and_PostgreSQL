@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+  
+{% block title %}Home{% endblock %}
+  
+{% block content %}
+    <div>
+<h1>Home page</h1>
+    <div style="display: flex">
+<p style="margin: 0">Welcome back, {{ username }}!</p>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class="flashes" style="margin: 0">
+        {% for message in messages %}
+            <p style="color: rgba(100,130,100,0.85); margin: 0">{{ message }}</p>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+    </div>
+<h2>Your posts</h2>
+<a style="text-decoration: none; color: #535db3" href="{{ url_for('create_news') }}">Create New Posts</a>
+<div class="cont" style="height: 68%">
+    {% for news in user_news %}
+        <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.2); padding: 5px; margin-top: 5px">
+            <h4>Description:<br>{{ news['description'] }}</h4>
+            <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+            <p>Code or idea for implementation:<br>{{ news['main_text'] }}</p>
+            </div>
+            <p>Conclusion:<br>{{ news['note'] }}</p>
+            <form action="{{ url_for('delete_news', news_id=news['id']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn" style="background-color: rgba(153,25,25,0.5)">Delete</button>
+            </form>
+            <a class="btn" style="color: black; background-color: rgba(25,125,25,0.5)" href="{{ url_for('edit_news', news_id=news['id']) }}">Edit</a>
+        </div>
+    {% endfor %}
+</div>
+</div>
+{% endblock %}

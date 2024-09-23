@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block title %}Favorites{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>Your Favorite Posts</h1>
+        <div class="cont">
+            {% for news in user_news %}
+                <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.2); padding: 5px; margin-top: 5px">
+                    <h4>Description:<br>{{ news['description'] }}</h4>
+                    <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+                        <p>Code or idea for implementation:<br>{{ news['main_text'] }}</p>
+                    </div>
+                    <p>Conclusion:<br>{{ news['note'] }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

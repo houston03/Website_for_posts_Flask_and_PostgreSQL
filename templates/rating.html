@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block title %}About N{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Ideas, code and suggestions</h1>
+    <div style="display: flex">
+        <p>Here you can learn something new and share your experience.</p>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes" style="margin: 0">
+                {% for message in messages %}
+                    <p style="color: rgba(100,130,100,0.85); margin: 0">{{ message }}</p>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+    <div class="cont" style="height: 75.6%">
+        {% for news in user_news %}
+            <div class="container_" style="width: 100%; background-color: rgba(255, 255, 255, 0.2); padding: 5px; margin-top: 5px">
+                <h4>Description:<br>{{ news['description'] }}</h4>
+                <div class="container_" style="width: 100%; background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+                    <p>Code or idea for implementation:<br>{{ news['main_text'] }}</p>
+                </div>
+                <p>Conclusion:<br>{{ news['note'] }}</p>
+                <p>In favorites at: {{ favorite_counts.get(news['id'], 0) }}</p> <!-- Display favorite count -->
+                {% if news['id'] in favorite_ids %}
+                    <form action="{{ url_for('remove_favorite', news_id=news['id']) }}" method="post">
+                        <button class="btn" style="background-color: rgba(153,25,25,0.5);width: 200px" type="submit">Remove from Favorites</button>
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('add_favorite', news_id=news['id']) }}" method="post">
+                        <button class="btn" style="background-color: rgba(25,125,25,0.5)" type="submit">Add to Favorites</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

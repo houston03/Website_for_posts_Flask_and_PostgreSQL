@@ -1,0 +1,127 @@
+{% extends 'layout.html' %}
+  
+{% block title %}About N{% endblock %}
+  
+{% block content %}
+<h1>A neural network that distinguishes objects</h1>
+    <div class="cont" style="">
+<div>
+<p>Let's analyze and train the neural network to distinguish what is depicted in the photo. Google Colab was used for faster learning.</p>
+    <p>We will install all the necessary libraries..</p>
+    <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+import numpy as np<br>
+import matplotlib.pyplot as plt<br>
+import tensorflow as tf<br>
+from tensorflow import keras<br>
+%matplotlib inline<br>
+
+from tensorflow.keras.datasets import cifar10<br>
+from tensorflow.keras import utils<br>
+from tensorflow.keras.layers import Dense, Dropout<br>
+from tensorflow.keras.models import Sequential<br>
+    </div>
+    <p>Cifar10 is a large dataset with various images, for example, as with MNIST numbers</p>
+    <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+        (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+    </div>
+<p>We will have 10 different categories of 32 by 32 images.</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    class_name = ['Airplanes',<br>
+'Cars',<br>
+'Birds',<br>
+'Cats',<br>
+'Deer',<br>
+'Dogs',<br>
+'Frogs',<br>
+'Horses',<br>
+'Ships',<br>
+'Trucks']<br>
+
+
+plt.figure()<br>
+plt.imshow(x_train[2])<br>
+plt.colorbar()<br>
+plt.grid(False)<br>
+</div>
+    <p>Plt is needed for the visual. Let's just see which images the dataset contains</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    x_train = x_train / 255<br>
+x_test = x_test / 255<br>
+
+
+
+plt.figure(figsize=(10,10))<br>
+for i in range (25):<br>
+  plt.subplot(5,5,i+1)<br>
+  plt.xticks([])<br>
+  plt.yticks([])<br>
+  plt.imshow(x_train[i])<br>
+</div>
+
+<p>Now we are building a model for training, for 50% accuracy it will be enough to run 100 epochs.
+    We also convert the input data from a multidimensional array to a one-dimensional array with the line "keras.layers.Flatten(input_shape=(32, 32, 3))" - 32x32 pixels with 3 color channels (RGB). (128, activation='relu') is a fully connected layer with 128 neurons and a ReLU activation function (helps to learn faster).
+    keras.layers.Dense(10, activation='softmax') is a fully connected layer with 10 neurons and a softmax activation function that is used for multiclass classification tasks.</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+model = keras.Sequential([<br>
+    keras.layers.Flatten(input_shape=(32, 32, 3)),<br>
+    keras.layers.Dense(128, activation='relu'),<br>
+    keras.layers.Dense(10, activation='softmax'),<br>
+])<br>
+
+
+model.compile(optimizer=tf.keras.optimizers.SGD(), loss='sparse_categorical_crossentropy', metrics=['accuracy'])<br>
+
+
+model.summary()<br>
+    model.fit(x_train, y_train, epochs=100)<br>
+</div>
+<p>The training looks like this:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+
+Epoch 90/100<br>
+1563/1563 ━━━━━━━━━━━━━━━━━━━━ 9s 4ms/step - accuracy: 0.6824 - loss: 0.9049<br>
+Epoch 91/100<br>
+1563/1563 ━━━━━━━━━━━━━━━━━━━━ 10s 4ms/step - accuracy: 0.6845 - loss: 0.9049<br>
+Epoch 92/100<br>
+1563/1563 ━━━━━━━━━━━━━━━━━━━━ 8s 5ms/step - accuracy: 0.6856 - loss: 0.8974<br>
+</div>
+<p>Let's see the accuracy of the definition</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    test_loss, test_acc = model.evaluate(x_test, y_test)<br>
+print('Test accuracy:', test_acc)<br>
+</div>
+<p>We have made up - accuracy: 0.5084 - loss: 1.5640.
+    And now you can test, the code is presented, where the object in the selected photo predictions[2510]
+    is determined by the larger value 5.2902436e-01, then we check if this is the case. In our case, 2510 is a frog,
+    the largest value is at number 6, we look at class_name and yes, at number 6 we have a frog, the neural network is trained, hooray
+</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    predictions = model.predict(x_train)<br>
+predictions[2510]<br>
+
+
+np.argmax(predictions[2510])<br>
+</div>
+    <p>The output looks like this:</p>
+    <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+
+    1563/1563 ━━━━━━━━━━━━━━━━━━━━ 5s 3ms/step<br>
+array([3.3397012e-04, 3.4678399e-04, 1.4361042e-02, 2.8959194e-01,<br>
+       7.1040769e-03, 1.2215130e-01, 5.2902436e-01, 3.6011804e-02,<br>
+       1.9606838e-05, 1.0551260e-03], dtype=float32)<br>
+
+</div>
+    <p>We check it manually</p>
+        <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+  y_train[2510]
+   plt.figure()
+plt.imshow(x_train[2510])
+plt.colorbar()
+plt.grid(False)
+class_name[np.argmax(predictions[2510])]
+
+</div>
+    <p>'Frogs' Hooray...</p>
+</div>
+    </div>
+{% endblock %}

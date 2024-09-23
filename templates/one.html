@@ -1,0 +1,381 @@
+{% extends 'layout.html' %}
+  
+{% block title %}About N{% endblock %}
+  
+{% block content %}
+<h1>Text generation</h1>
+<div>
+<div class="cont" style="">
+<p>The ultimate goal of this guide is to use TensorFlow and Keras to use LSTM models to generate text.</p>
+    <p>Let's install the required dependencies for this tutorial:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>pip3 install tensorflow==2.0.1 numpy requests tqdm</p>
+</div>
+<p>Importing everything:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+import tensorflow as tf<br>
+import numpy as np<br>
+import os<br>
+import pickle<br>
+from tensorflow.keras.models import Sequential<br>
+from tensorflow.keras.layers import Dense, LSTM, Dropout<br>
+from string import punctuation<br>
+    </p>
+    </div>
+<p>
+    We are going to use a free downloadable book as the dataset for this tutorial: Alice’s Adventures in Wonderland by Lewis Carroll.<br>
+    These lines of code will download it and save it in a text file:
+</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+import requests<br>
+content = requests.get("http://www.gutenberg.org/cache/epub/11/pg11.txt").text<br>
+open("Alice.txt", "w", encoding="utf-8").write(content)<br>
+    </p>
+    </div>
+
+<p>
+    Now let's define our parameters and try to clean this dataset:
+</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+sequence_length = 100<br>
+BATCH_SIZE = 128<br>
+EPOCHS = 30<br>
+
+FILE_PATH = "Alice.txt"<br>
+BASENAME = os.path.basename(FILE_PATH)<br>
+
+text = open(FILE_PATH, encoding="utf-8").read()<br>
+
+text = text.lower()<br>
+
+text = text.translate(str.maketrans("", "", punctuation))<br>
+    </p>
+    </div>
+<p>Let's print some statistics about the dataset:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+n_chars = len(text)<br>
+vocab = ''.join(sorted(set(text)))<br>
+print("unique_chars:", vocab)<br>
+n_unique_chars = len(vocab)<br>
+print("Number of characters:", n_chars)<br>
+print("Number of unique characters:", n_unique_chars)<br>
+    </p>
+    </div>
+<p>Since we have vocab as our vocabulary that contains all the unique characters of our dataset, we can make two dictionaries that map each character to an integer number and vice-versa:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+
+char2int = {c: i for i, c in enumerate(vocab)}<br>
+
+int2char = {i: c for i, c in enumerate(vocab)}<br>
+    </p>
+    </div>
+<p>Let's save them to a file (to retrieve them later in text generation):</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+
+pickle.dump(char2int, open(f"{BASENAME}-char2int.pickle", "wb"))<br>
+pickle.dump(int2char, open(f"{BASENAME}-int2char.pickle", "wb"))<br>
+    </p>
+    </div>
+<p>Now let's encode our dataset, in other words, we gonna convert each character into its corresponding integer number:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+
+encoded_text = np.array([char2int[c] for c in text])<br>
+
+char_dataset = tf.data.Dataset.from_tensor_slices(encoded_text)<br>
+
+for char in char_dataset.take(8):<br>
+&emsp;    print(char.numpy(), int2char[char.numpy()])<br>
+    </p>
+    </div>
+<p>Great, now we need to construct our sequences, as mentioned earlier, we want each input sample to be a sequence of characters of the length sequence_length and the output of a single character that is the next one. Luckily for us, we have to use tf.data.Dataset's batch() method to gather characters together:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+
+sequences = char_dataset.batch(2*sequence_length + 1, drop_remainder=True)<br>
+
+
+for sequence in sequences.take(2):<br>
+&emsp;    print(''.join([int2char[i] for i in sequence.numpy()]))<br>
+    </p>
+    </div>
+<p>Now you know how each sample is represented, let's prepare our inputs and targets, we need a way to convert a single sample (sequence of characters) into multiple (input, target) samples. Fortunately, the flat_map() method is exactly what we need; it takes a callback function that loops over all our data samples:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+def split_sample(sample):<br>
+
+&emsp;    ds = tf.data.Dataset.from_tensors((sample[:sequence_length], sample[sequence_length]))<br>
+&emsp;    for i in range(1, (len(sample)-1) // 2):<br>
+
+&emsp;&emsp;        input_ = sample[i: i+sequence_length]<br>
+&emsp;&emsp;        target = sample[i+sequence_length]<br>
+
+&emsp;&emsp;        other_ds = tf.data.Dataset.from_tensors((input_, target))<br>
+&emsp;&emsp;        ds = ds.concatenate(other_ds)<br>
+&emsp;    return ds<br>
+
+
+dataset = sequences.flat_map(split_sample)<br>
+    </p>
+    </div>
+<p>After we constructed our samples, let's one-hot encode both the inputs and the labels (targets):</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+def one_hot_samples(input_, target):<br>
+
+&emsp;    return tf.one_hot(input_, n_unique_chars), tf.one_hot(target, n_unique_chars)<br>
+
+dataset = dataset.map(one_hot_samples)<br>
+    </p>
+    </div>
+<p>We've used the convenient map() method to one-hot encode each sample on our dataset, tf.one_hot() method does what we expect. Let's try to print the first two data samples along with their shapes:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+for element in dataset.take(2):<br>
+&emsp;    print("Input:", ''.join([int2char[np.argmax(char_vector)] for char_vector in element[0].numpy()]))<br>
+&emsp;    print("Target:", int2char[np.argmax(element[1].numpy())])<br>
+&emsp;    print("Input shape:", element[0].shape)<br>
+&emsp;    print("Target shape:", element[1].shape)<br>
+&emsp;    print("="*50, "\n")<br>
+    </p>
+    </div>
+<p>Finally, we repeat, shuffle and batch our dataset:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+ds = dataset.repeat().shuffle(1024).batch(BATCH_SIZE, drop_remainder=True)
+    </p>
+    </div>
+<p>The output layer is a fully-connected layer with 39 units where each neuron corresponds to a character (probability of the occurrence of each character).</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+model = Sequential([<br>
+&emsp;    LSTM(256, input_shape=(sequence_length, n_unique_chars), return_sequences=True),<br>
+&emsp;    Dropout(0.3),<br>
+&emsp;    LSTM(256),<br>
+&emsp;    Dense(n_unique_chars, activation="softmax"),<br>
+])
+    </p>
+    </div>
+<p>After we've built our model, let's print the summary and compile it:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+model_weights_path = f"results/{BASENAME}-{sequence_length}.h5"<br>
+model.summary()<br>
+model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])<br>
+    </p>
+    </div>
+<p>Let's train the model now:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+if not os.path.isdir("results"):<br>
+&emsp;    os.mkdir("results")<br>
+
+model.fit(ds, steps_per_epoch=(len(encoded_text) - sequence_length) // BATCH_SIZE, epochs=EPOCHS)<br>
+
+model.save(model_weights_path)<br>
+    </p>
+    </div>
+<p>Result:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+Epoch 28/30<br>
+2528/2528 ━━━━━━━━━━━━━━━━━━━━ 797s 315ms/step - accuracy: 0.8971 - loss: 0.3033<br>
+Epoch 29/30<br>
+2528/2528 ━━━━━━━━━━━━━━━━━━━━ 809s 320ms/step - accuracy: 0.8975 - loss: 0.2967<br>
+Epoch 30/30<br>
+2528/2528 ━━━━━━━━━━━━━━━━━━━━ 778s 308ms/step - accuracy: 0.8991 - loss: 0.2929<br>
+    </p>
+    </div>
+<p>This will take few hours, depending on your hardware, try increasing batch_size to 256 for faster training.</p>
+<p>After training, a folder with the trained h5 model is created. The following code presents a neural network for text generation that uses a previously trained model:</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+import numpy as np<br>
+import pickle<br>
+import tqdm<br>
+from tensorflow.keras.models import Sequential<br>
+from tensorflow.keras.layers import Dense, LSTM, Dropout, Activation<br>
+import os<br>
+
+sequence_length = 100<br>
+    <p style="color: darkgrey"># dataset file path</p>
+FILE_PATH = "Alice.txt"<br>
+    <p style="color: darkgrey"># FILE_PATH = "data/python_code.py"</p>
+BASENAME = os.path.basename(FILE_PATH)<br>
+seed = "chapter xiii"<br>
+
+
+<p style="color: darkgrey"># load vocab dictionaries</p>
+char2int = pickle.load(open(f"{BASENAME}-char2int.pickle", "rb"))<br>
+int2char = pickle.load(open(f"{BASENAME}-int2char.pickle", "rb"))<br>
+vocab_size = len(char2int)<br>
+
+
+<p style="color: darkgrey"># building the model</p>
+model = Sequential([<br>
+    LSTM(256, input_shape=(sequence_length, vocab_size), return_sequences=True),<br>
+    Dropout(0.3),<br>
+    LSTM(256),<br>
+    Dense(vocab_size, activation="softmax"),<br>
+])<br>
+
+
+<p style="color: darkgrey"># load the optimal weights</p>
+model.load_weights(f"results/{BASENAME}-{sequence_length}.h5")<br>
+
+
+s = seed<br>
+n_chars = 400<br>
+    <p style="color: darkgrey"># generate 400 characters</p>
+generated = ""<br>
+for i in tqdm.tqdm(range(n_chars), "Generating text"):<br>
+     <p style="color: darkgrey"># make the input sequence</p>
+&emsp;    X = np.zeros((1, sequence_length, vocab_size))<br>
+&emsp;    for t, char in enumerate(seed):<br>
+&emsp;&emsp;        X[0, (sequence_length - len(seed)) + t, char2int[char]] = 1<br>
+      <p style="color: darkgrey"># predict the next character</p>
+&emsp;    predicted = model.predict(X, verbose=0)[0]<br>
+     <p style="color: darkgrey"># converting the vector to an integer</p>
+&emsp;    next_index = np.argmax(predicted)<br>
+     <p style="color: darkgrey"># converting the integer to a character</p>
+&emsp;    next_char = int2char[next_index]<br>
+    <p style="color: darkgrey"># add the character to results</p>
+&emsp;    generated += next_char<br>
+   <p style="color: darkgrey"># shift seed and the predicted character</p>
+&emsp;    seed = seed[1:] + next_char<br>
+
+print("Seed:", s)<br>
+print("Generated text:")<br>
+print(generated)<br>
+    </p>
+</div>
+    <p>Here's what the neural network generated here</p>
+    <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+        Generating text: 100%|██████████| 200/200 [00:12<00:00, 16.01it/s]<br>
+
+Generated text:<br>
+ shall but<br>
+
+them and enterniauply alto<br>
+
+alice fitness—and any little white<br>
+
+rabbit come back very<br>
+
+shook the right<br>
+
+way and wander<br>
+
+
+
+“i was much as she<br>
+
+part and as they<br>
+
+addraimialar<br>
+
+minume had bee<br>
+    </p>
+    </div>
+<p>
+For a more diverse test, we use the same model, but add a random and def sample.
+</p>
+<div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+sequence_length = 100<br>
+FILE_PATH = "Alice.txt"<br>
+BASENAME = os.path.basename(FILE_PATH)<br>
+
+seed = "chapter xiii"<br>
+
+
+char2int = pickle.load(open(f"{BASENAME}-char2int.pickle", "rb"))<br>
+int2char = pickle.load(open(f"{BASENAME}-int2char.pickle", "rb"))<br>
+vocab_size = len(char2int)<br>
+
+
+model = Sequential([<br>
+&emsp;    LSTM(256, input_shape=(sequence_length, vocab_size), return_sequences=True),<br>
+&emsp;    Dropout(0.3),<br>
+&emsp;    LSTM(256),<br>
+&emsp;    Dense(vocab_size, activation="softmax"),<br>
+])<br>
+
+
+model.load_weights(f"results/{BASENAME}-{sequence_length}.h5")<br>
+
+
+def sample(preds, temperature=1.0):<br>
+&emsp;    preds = np.asarray(preds).astype('float64')<br>
+&emsp;    preds = np.log(preds) / temperature<br>
+&emsp;    exp_preds = np.exp(preds)<br>
+&emsp;    preds = exp_preds / np.sum(exp_preds)<br>
+&emsp;    probas = np.random.multinomial(1, preds, 1)<br>
+&emsp;    return np.argmax(probas)<br>
+
+s = seed<br>
+n_chars = 200<br>
+generated = ""<br>
+temperature = 1.0  <br>
+
+for i in tqdm.tqdm(range(n_chars), "Generating text"):<br>
+&emsp;    X = np.zeros((1, sequence_length, vocab_size))<br>
+&emsp;    for t, char in enumerate(seed):<br>
+&emsp;&emsp;        X[0, (sequence_length - len(seed)) + t, char2int[char]] = 1<br>
+&emsp;    predicted = model.predict(X, verbose=0)[0]<br>
+&emsp;    next_index = sample(predicted, temperature)<br>
+&emsp;    next_char = int2char[next_index]<br>
+&emsp;    generated += next_char<br>
+&emsp;    seed = seed[1:] + next_char<br>
+
+print("Seed:", s)<br>
+print("Generated text:")<br>
+print(generated)<br>
+    </p>
+    </div>
+<p>
+    Now a different text will be generated each time. Here is one example:
+</p>
+    <div class="container_" style="width: 100%;  background-color: rgba(255, 255, 255, 0.5); padding: 5px">
+    <p>
+Generating text: 100%|██████████| 200/200 [00:12<00:00, 15.96it/s]<br>
+Generated text:<br>
+
+ushe’ll get to<br>
+
+nall not be some<br>
+
+by the way if<br>
+
+how don’t be a large more much a naw fle<br>
+
+mind as holder<br>
+
+as he moved of<br>
+
+anyooh a few<br>
+
+licanse and smalen<br>
+
+
+
+“somewhing or<br>
+
+license is shr<br>
+
+croset an<br>
+    </p>
+    </div>
+</div>
+
+
+</div>
+
+{% endblock %}

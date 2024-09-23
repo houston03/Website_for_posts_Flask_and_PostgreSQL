@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+ <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+ </head>
+
+ <body style="background-color:white;">
+ <div class="box">
+  <div class="login-box" >
+  <div class="login-header">Login</div>
+  <div class="login-body">
+    <p>Please enter your username and password</p>
+    <form class="form-group" action="{{ url_for('login') }}" method="post">
+        <label>Username</label>
+        <input type="text" class="form-control_1" name="username" placeholder="" id="username" required>
+        <label>Password</label>
+        <input type="password" class="form-control_1" name="password" placeholder="" id="password" required>
+        <div class="checkbox-wrapper-2">
+        <input type="checkbox" value="checked" class="sc-gJwTLC ikxBAC" style="vertical-align:middle;">
+            <b style="padding-left: 5px; text-decoration: none;">Remember</b>
+        </div>
+        <input type="submit" value="Login" class="form-control_1 btn btn-one" name="">
+    </form>
+    {% with messages = get_flashed_messages()  %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <p>No account <a style="text-decoration: none; color: #535db3" href="{{ url_for('register') }}">Register</a></p>
+  </div>
+ </div>
+  </div>
+ </body>
+
+</html>

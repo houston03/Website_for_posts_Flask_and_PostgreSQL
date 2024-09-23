@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+  <!-- Google Fonts -->
+  <link href='https://fonts.googleapis.com/css?family=Passion+One' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+ </head>
+ <body style="background-color:#ccc;">
+ <div class="box">
+ <div class="container" style="top: 20%; position: relative; margin-left: auto; margin-right: auto">
+   <div class="row main">
+    <div class="main-login main-center">
+
+    <p style="padding-top: 15px">Register New user or login existing account</p>
+     <form action="{{ url_for('register') }}" method="post" autocomplete="off">
+      <div class="form-group">
+       <label for="name" class="cols-sm-2 control-label" >Your Name</label>
+       <div class="cols-sm-10" style="box-shadow: none">
+        <div class="input-group">
+         <span class="input-group-addon"></span>
+         <input type="text" class="form-control_" name="fullname" id="fullname"  placeholder=""/>
+        </div>
+       </div>
+      </div>
+      <div class="form-group">
+       <label for="email" class="cols-sm-2 control-label">Your Email</label>
+       <div class="cols-sm-10">
+        <div class="input-group">
+         <span class="input-group-addon"></span>
+         <input type="text" class="form-control_" name="email" id="email"  placeholder=""/>
+        </div>
+       </div>
+      </div>
+
+      <div class="form-group">
+       <label for="username" class="cols-sm-2 control-label">Username</label>
+       <div class="cols-sm-10">
+        <div class="input-group">
+         <span class="input-group-addon"></span>
+         <input type="text" class="form-control_" name="username" id="username" placeholder="" required>
+        </div>
+       </div>
+      </div>
+
+      <div class="form-group">
+       <label for="password" class="cols-sm-2 control-label">Password</label>
+       <div class="cols-sm-10">
+        <div class="input-group">
+         <span class="input-group-addon"></span>
+         <input type="password" class="form-control_" name="password"  id="password" required  placeholder=""/>
+        </div>
+       </div>
+      </div>
+
+      <div class="form-group ">
+        {% with messages = get_flashed_messages()  %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert" role="alert">
+          {{ message }}
+
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+       <input type="submit" value="Register" class="form-control_1" name="">
+       <p style="padding-top:5px;">Enter
+       <a style="text-decoration: none; color: #535db3" href="{{ url_for('login') }}" >Login</a></p>
+
+      </div>
+
+     </form>
+    </div>
+   </div>
+  </div>
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+ </div>
+ </body>
+</html>

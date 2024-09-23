@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+ <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+ </head>
+ <body class="loggedin" id="bootstrap-overrides">
+ <div class="box">
+ <nav class="site-header sticky-top py-1">
+      <div class="container d-flex flex-column flex-md-row justify-content-between">
+  <a class="btn btn-one text white" href="{{ url_for('home_one') }}"> Home</a>
+  <a class="btn btn-one text white" href="{{ url_for('profile') }}">Profile</a>
+  <a class="btn btn-one text white" href="{{ url_for('logout') }}"> Logout</a>
+   </div>
+    </nav>
+
+ <div class="container-fluid">
+      <div class="row">
+        <nav class="col-md-2 d-none d-md-block">
+          <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="btn btn-one text white" href="{{ url_for('about') }}">
+                  <i class="fas fa-home"></i>
+                  About neural <span class="sr-only">(current)</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="btn btn-one text white" href="{{ url_for('one') }}">
+                  <i class="fas fa-shopping-cart"></i>
+                  Generation 1
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="btn btn-one text white" href="{{ url_for('two') }}">
+    <i class="fas fa-shopping-cart"></i>
+                  Generation 2
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="btn btn-one text white" href="{{ url_for('create_news') }}">
+                  <i class="fas fa-download"></i>
+                  Create
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="btn btn-one text white" href="{{ url_for('rating') }}">
+                  <i class="fas fa-download"></i>
+                  Posts
+                </a>
+              </li>
+                <li class="nav-item">
+                <a class="btn btn-one text white" href="{{ url_for('favorites') }}">
+                  <i class="fas fa-download"></i>
+                  Favorites
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="btn btn-one text white" href="{{ url_for('cont') }}">
+                  <i class="fas fa-download"></i>
+                  Contacts
+                </a>
+              </li>
+            </ul>
+   </div>
+        </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <div class="col-12">
+   {% block content %}{% endblock %}
+   </div>
+          </div>
+   </main>
+
+      </div>
+    </div>
+ </div>
+ </body>
+</html>
