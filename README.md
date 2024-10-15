@@ -14,9 +14,9 @@
 ![image](https://github.com/user-attachments/assets/3cdc04ad-8df7-415b-bfde-50cb6287a093)
 ![image](https://github.com/user-attachments/assets/97d193e2-c27e-453b-a7aa-dec021bdc32c)
 
-рейтинг постов и тд. 
+рейтинг постов;
 ![image](https://github.com/user-attachments/assets/185fe8b1-67aa-4f4b-bf34-d8a8dc01f8bf)
 
-К сожалению для бесплатных хостингов большое количество зависимостей как у меня, недопустимо.
+
 
 
