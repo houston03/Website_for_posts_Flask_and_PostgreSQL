@@ -100,7 +100,7 @@ def rating():
         """, (session['id'],))
         favorite_ids = {row['news_id'] for row in cursor.fetchall()}  # Store favorite news IDs in a set
 
-    # Get the count of favorites for each news article
+    
     cursor.execute("""
         SELECT news_id, COUNT(*) as favorite_count FROM favorites GROUP BY news_id
     """)
@@ -165,33 +165,33 @@ def favorites():
 def login():
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        # Check if "username" and "password" POST requests exist (user submitted form)
+        
         if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
                 username = request.form['username']
                 password = request.form['password']
                 print(password)
 
-                # Check if account exists using MySQL
+                
                 cursor.execute('SELECT * FROM usersreg WHERE username = %s', (username,))
-                # Fetch one record and return result
+                
                 account = cursor.fetchone()
 
                 if account:
                         password_rs = account['password']
                         print(password_rs)
-                        # If account exists in users table in out database
+                        
                         if check_password_hash(password_rs, password):
-                                # Create session data, we can access this data in other routes
+                                
                                 session['loggedin'] = True
                                 session['id'] = account['id']
                                 session['username'] = account['username']
-                                # Redirect to home page
+                                
                                 return redirect(url_for('home'))
                         else:
-                                # Account doesnt exist or username/password incorrect
+                               
                                 flash('Incorrect username/password')
                 else:
-                        # Account doesnt exist or username/password incorrect
+                        
                         flash('Incorrect username/password')
 
         return render_template('login.html')
@@ -201,7 +201,7 @@ def login():
 def register():
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        # Check if "username", "password" and "email" POST requests exist (user submitted form)
+      
         if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
                 # Create variables for easy access
                 fullname = request.form['fullname']
@@ -211,11 +211,11 @@ def register():
 
                 _hashed_password = generate_password_hash(password)
 
-                # Check if account exists using MySQL
+               
                 cursor.execute('SELECT * FROM usersreg WHERE username = %s', (username,))
                 account = cursor.fetchone()
                 print(account)
-                # If account exists show error and validation checks
+               
                 if account:
                         flash('Account already exists!')
                 elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
@@ -225,25 +225,25 @@ def register():
                 elif not username or not password or not email:
                         flash('Please fill out the form!')
                 else:
-                        # Account doesnt exists and the form data is valid, now insert new account into users table
+                        
                         cursor.execute("INSERT INTO usersreg (fullname, username, password, email) VALUES (%s,%s,%s,%s)",
                                        (fullname, username, _hashed_password, email))
                         conn.commit()
                         flash('You have successfully registered!')
         elif request.method == 'POST':
-                # Form is empty... (no POST data)
+               
                 flash('Please fill out the form!')
-        # Show registration form with message (if any)
+       
         return render_template('register.html')
 
 
 @app.route('/logout')
 def logout():
-        # Remove session data, this will log the user out
+        
         session.pop('loggedin', None)
         session.pop('id', None)
         session.pop('username', None)
-        # Redirect to login page
+       
         return redirect(url_for('login'))
 
 
@@ -251,13 +251,13 @@ def logout():
 def profile():
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        # Check if user is loggedin
+       
         if 'loggedin' in session:
                 cursor.execute('SELECT * FROM usersreg WHERE id = %s', [session['id']])
                 account = cursor.fetchone()
-                # Show the profile page with account info
+               
                 return render_template('profile.html', account=account)
-        # User is not loggedin redirect to login page
+       
         return redirect(url_for('login'))
 
 
@@ -273,7 +273,7 @@ def create_news():
         note = request.form.get('note', '')
         user_id = session['id']
 
-        # Validate data here
+      
         if not description or not main_text:
             flash('Description and main text are required!', 'error')
             return render_template('create_news.html')
@@ -287,7 +287,7 @@ def create_news():
             return redirect(url_for('home'))  # Redirect to the home or news page
         except Exception as e:
             flash('An error occurred while creating post.', 'error')
-            # Optionally log the error
+            
             print(e)
 
     return render_template('create_news.html')
@@ -302,7 +302,7 @@ def edit_news(news_id):
         main_text = request.form.get('main_text', '')
         note = request.form.get('note', '')
 
-        # Validate data here
+     
         if not description or not main_text:
             flash('Description and main text are required!', 'error')
             return render_template('edit_news.html', news_id=news_id)
