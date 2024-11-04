@@ -3,8 +3,8 @@ html,body, img{
   width: 100%;
   height: 100%;
     ::-webkit-scrollbar {
-    width: 24px; /* ширина для вертикального скролла */
-    height: 8px; /* высота для горизонтального скролла */
+    width: 24px; 
+    height: 8px;
     background-color: rgba(100,54,130,0.2);
         border-radius: 9em;
 }
