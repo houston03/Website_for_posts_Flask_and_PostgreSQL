@@ -13,7 +13,7 @@ html,body, img{
     border-radius: 9em;
 
 }
-    ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    ::-webkit-input-placeholder {
     color: rgba(150,94,170,0.9);
 }
 
