@@ -25,7 +25,7 @@
                     <p>Code or idea for implementation:<br>{{ news['main_text'] }}</p>
                 </div>
                 <p>Conclusion:<br>{{ news['note'] }}</p>
-                <p>In favorites at: {{ favorite_counts.get(news['id'], 0) }}</p> <!-- Display favorite count -->
+                <p>In favorites at: {{ favorite_counts.get(news['id'], 0) }}</p> 
                 {% if news['id'] in favorite_ids %}
                     <form action="{{ url_for('remove_favorite', news_id=news['id']) }}" method="post">
                         <button class="btn" style="background-color: rgba(153,25,25,0.5);width: 200px" type="submit">Remove from Favorites</button>
